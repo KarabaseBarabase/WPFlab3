@@ -1,0 +1,22 @@
+﻿<Window x:Class="WPFlab3.InputWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPFlab3"
+        mc:Ignorable="d"
+        Title="InputWindow" Height="170" Width="272">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <DockPanel Margin="10">
+                <TextBlock Text="Введите стартовую вершину:"></TextBlock>
+                <TextBox x:Name="tb_start" Width="50"></TextBox>
+            </DockPanel>
+            <DockPanel Margin="10">
+                <TextBlock Text="Введите конечную вершину:"></TextBlock>
+                <TextBox x:Name="tb_end" Width="50"></TextBox>
+            </DockPanel>
+            <Button Click="BtnClick_Close" Margin="20" Width="50">Ok</Button>
+        </StackPanel>
+        </Grid>
+</Window>
