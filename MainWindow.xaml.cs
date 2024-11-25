@@ -84,11 +84,11 @@ namespace WPFlab3
                 {
                     node = node.AddOrGetNode(graph, graph.Count);
                     node.position = MousePos;
-                    function.CreateVertex(MousePos, node);
-                    graphData.Add((node.MyValue, -1, 0));
-
                     NodePicture nodePic = new NodePicture(graph.Count().ToString(), "Black");
                     node.nodePic = nodePic;
+
+                    function.CreateVertex(MousePos, node);
+                    graphData.Add((node.MyValue, -1, 0));
                 }
             }
             else if (newEdge)
@@ -283,7 +283,7 @@ namespace WPFlab3
                 tempLine = null;
                 if (string.IsNullOrEmpty(tbWeight.Text))
                     tbWeight.Text = "0";
-                function.AddEdge(MousePos, secondMousePos, graph, graphData, Convert.ToInt32(tbWeight.Text));
+                function.AddEdge(MousePos, secondMousePos, graph, graphData, Convert.ToInt32(tbWeight.Text), null);
             }
         }
         private void DrawingCanvas_MouseMove(object sender, MouseEventArgs e)

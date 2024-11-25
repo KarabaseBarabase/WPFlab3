@@ -26,7 +26,7 @@ namespace WPFlab3
         public void CreateVertex(Point position, Node node)
         {
             string selectedColorName = GetSelectedColor();
-            Brush strokeBrush = ConvertStringToBrush(selectedColorName);
+            Brush strokeBrush = ConvertStringToBrush(node.nodePic.colorNode); //selectedColorName);
             Ellipse vertex = new Ellipse()
             {
                 Width = size,
@@ -65,7 +65,7 @@ namespace WPFlab3
             Canvas.SetLeft(grid, posX);
             mainWindow.DrawingCanvas.Children.Add(grid);
         }
-        public void AddEdge(Point pos1, Point pos2, Dictionary<int, Node> graph, List<(int, int, int)> graphData, int weight)
+        public void AddEdge(Point pos1, Point pos2, Dictionary<int, Node> graph, List<(int, int, int)> graphData, int weight, Edge paintEdge)
         {
             Node from = new Node(); Node to = new Node();
             for (int i = 0; i < graph.Count; i++) //если ребро между вершинами, то меняем координаты начала и конца ребра на координаты вершины, чтобы было по центру
@@ -82,7 +82,10 @@ namespace WPFlab3
                 if (edge2.AddEdge(graphData, from, to, weight, mainWindow.isOriented, numEdges,edgePic ))
                 {
                     string selectedColorName = GetSelectedColor();
-                    Brush strokeBrush = ConvertStringToBrush(selectedColorName);
+                    Brush strokeBrush;
+                    if (paintEdge == null)
+                        strokeBrush = ConvertStringToBrush(selectedColorName);
+                    else strokeBrush = ConvertStringToBrush(paintEdge.edgePic.ColorEdge);
                     Line edge = new Line()
                     {
                         X1 = from.position.X,
@@ -456,7 +459,7 @@ namespace WPFlab3
                 CreateVertex(nodes[count].position, nodes[count]);
                 if (nodes[count].edges != null)
                     for (int i = 0; i < nodes[count].edges.Count; i++)
-                        AddEdge(nodes[count].position, nodes[count].edges.ElementAt(i).adjacentNode.position, graph, mainWindow.graphData, nodes[count].edges.ElementAt(i).weight);
+                        AddEdge(nodes[count].position, nodes[count].edges.ElementAt(i).adjacentNode.position, graph, mainWindow.graphData, nodes[count].edges.ElementAt(i).weight, nodes[count].edges.ElementAt(i));
             }
         }
 
