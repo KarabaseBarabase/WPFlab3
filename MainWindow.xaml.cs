@@ -543,20 +543,15 @@ namespace WPFlab3
             graph = newGraph;
             function.CreateGraph(newGraph.Values.ToList(), graph);
         }
+
         public int counted = 0;
         Ellipse kraska = new Ellipse();
         List<Ellipse> kraskaList = new List<Ellipse>();
         private void MenuItem_VertexClick(object sender, RoutedEventArgs e)
         {
-            //MessageBox.Show("a");
             for (int g = 0; g < DrawingCanvas.Children.Count; g++)
-            {
-                //MessageBox.Show("b");
-                if (DrawingCanvas.Children[g].GetType() == typeof(Grid))
-                {
-                    Grid grid = (Grid)DrawingCanvas.Children[g];
+                if (DrawingCanvas.Children[g] is Grid grid)
                     foreach (var gridchild in grid.Children)
-                    {
                         if (gridchild is Ellipse ellipse)
                         {
                             ellipse.Fill = Brushes.Red;
@@ -564,35 +559,22 @@ namespace WPFlab3
                             kraskaList.Add(ellipse);
                             return;
                         }
-                    }
-                }
-            }
         }
 
         private void MenuItem_NextClick(object sender, RoutedEventArgs e)
         {
             for (int g = 0; g < DrawingCanvas.Children.Count + 1; g++)
-            {
-
-                if (DrawingCanvas.Children[g].GetType() == typeof(Grid))
-                {
-
-                    Grid grid = (Grid)DrawingCanvas.Children[g];
+                if (DrawingCanvas.Children[g] is Grid grid)
                     foreach (var gridchild in grid.Children)
-                    {
                         if ((gridchild is Ellipse ellipse) && !kraskaList.Contains(ellipse))
                         {
                             ellipse.Fill = Brushes.Red;
-                            counted++;
+                            counted++; //?
                             kraska.Fill = Brushes.White;
                             kraska = ellipse;
                             kraskaList.Add(ellipse);
-                            //kraskaList.Add(kraska);
                             return;
                         }
-                    }
-                }
-            }
         }
         private void MenuItem_PrevClick(object sender, RoutedEventArgs e)
         {
@@ -602,18 +584,10 @@ namespace WPFlab3
         private void MenuItem_DeleteClick(object sender, RoutedEventArgs e)
         {
             for (int g = 0; g < DrawingCanvas.Children.Count; g++)
-            {
-                if (DrawingCanvas.Children[g].GetType() == typeof(Grid))
-                {
-
-                    Grid grid = (Grid)DrawingCanvas.Children[g];
+                if (DrawingCanvas.Children[g] is Grid grid)
                     foreach (var gridchild in grid.Children)
-                    {
                         if ((gridchild is Ellipse ellipse) && ellipse.Equals(kraska))
                             DrawingCanvas.Children.Remove(DrawingCanvas.Children[g]);
-                    }
-                }
-            }
         }
     }
 }

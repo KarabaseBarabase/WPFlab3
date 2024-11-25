@@ -22,9 +22,10 @@
                                     <MenuItem Header="Загрузить граф" Click="BtnClick_LoadGraph"/>
                                 </MenuItem>
                                 <MenuItem Header="Инструменты">
-                                    <MenuItem Header="Выбрать вершину" Click="MenuItem_VertexClick"></MenuItem>
-                                    <MenuItem Header="^" Click="MenuItem_NextClick"></MenuItem>
-                                    <MenuItem Header="пред" Click="MenuItem_PrevClick"></MenuItem>
+                                    <MenuItem Header="Выбрать вершину" Click="MenuItem_VertexClick">
+                                        <MenuItem Header="^" Click="MenuItem_NextClick"></MenuItem>
+                                        <MenuItem Header="пред" Click="MenuItem_PrevClick"></MenuItem>
+                                    </MenuItem>
                                     <MenuItem Header="Удалить элемент" Click="MenuItem_DeleteClick"/>
                                     <MenuItem Header="Создать вершину"/>
                                     <MenuItem Header="Создать ребро"/>
