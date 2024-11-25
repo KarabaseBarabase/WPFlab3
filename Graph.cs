@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xml.Linq;
 
 namespace WPFlab3
 {
@@ -77,6 +78,29 @@ namespace WPFlab3
                                      (point1.Y - point2.Y) * (point1.Y - point2.Y);
             return distanceSquared <= radiusSquared;
         }
+        private Edge ConvertFromDTO(EdgeDTO curEdge, List<NodeDTO> nodes)
+        {
+            Node adjacentNode = new Node();
+            for (int i = 0; i < nodes.Count; i++)
+                if (nodes[i].value == curEdge.adjacentNodeValue)
+                    adjacentNode = new Node(nodes[i].value, nodes[i].position, nodes[i].nodePic);
+
+            Edge edge = new Edge(adjacentNode, curEdge.weight, curEdge.num, curEdge.edgePic);
+            return edge;
+        }
+        public Node (NodeDTO curNode, List<NodeDTO> nodes)
+        {
+            MyValue = curNode.value;
+            position = curNode.position;
+            nodePic = curNode.nodePic;
+            Node parent = new Node(curNode.value, curNode.position, curNode.nodePic);
+            HashSet<Edge> edges = new HashSet<Edge>();
+            for (int i = 0; i < curNode.edges.Count; i++)
+                edges.Add(ConvertFromDTO(curNode.edges.ElementAt(i), nodes));
+            for (int i = 0; i < edges.Count; i++)
+                edges.ElementAt(i).adjacentNode.parents.Add(parent, edges.ElementAt(i));
+            this.edges = edges;
+        }
     }
 
     public class Edge
@@ -88,7 +112,7 @@ namespace WPFlab3
         //public Edge(Node adjacentNode, int weight, int numEdge) { this.adjacentNode = adjacentNode; this.weight = weight; num = numEdge; }
         public Edge() { }
         public Edge(Node adjacentNode, int weight, int num, EdgePicture edgePicture) { this.adjacentNode = adjacentNode; this.weight = weight; edgePic = edgePicture; this.num = num; }
-        public string ToString() { return adjacentNode.ToString(); }
+        public string ToString() { return weight.ToString() + ", " + adjacentNode.ToString(); }
         public bool AddEdge(List<(int, int, int)> graphData, Node node, Node adjacentNode, int weight, bool typeEdge, int numEdge, EdgePicture edgePic)
         {
             Edge edge = new Edge(adjacentNode, weight, numEdge, edgePic);
@@ -158,6 +182,7 @@ namespace WPFlab3
             edgePic = edge.edgePic;
             num = edge.num;
         }
+        
     }
     public class NodeDTO
     {
@@ -165,7 +190,7 @@ namespace WPFlab3
         public Point position;
         public NodePicture nodePic;
         public HashSet<EdgeDTO> edges = new HashSet<EdgeDTO>();
-        public Dictionary<Node, EdgeDTO> parents = new Dictionary<Node, EdgeDTO>();
+        //public Dictionary<NodeDTO, EdgeDTO> parents = new Dictionary<NodeDTO, EdgeDTO>();
         public NodeDTO() { }
         public NodeDTO(Node node)
         {
@@ -174,9 +199,10 @@ namespace WPFlab3
             nodePic = node.nodePic;
             for (int i = 0; i < node.edges.Count; i++)
                 edges.Add(new EdgeDTO(node.edges.ElementAt(i)));
-            for (int j = 0; j < node.parents.Count; j++)
-                parents.Add(node.parents.ElementAt(j).Key, new EdgeDTO(node.parents.ElementAt(j).Value));
+            //for (int j = 0; j < node.parents.Count; j++)
+            //    parents.Add(node.parents.ElementAt(j).Key, new EdgeDTO(node.parents.ElementAt(j).Value));
 
         }
+        
     }
 }

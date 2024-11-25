@@ -9,6 +9,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WPFlab3
 {
@@ -18,8 +19,6 @@ namespace WPFlab3
         public bool newVertex = false;
         public bool newEdge = false;
         private MainWindow mainWindow;
-        //public Dictionary<Edge, EdgePicture> edgePictures = new Dictionary<Edge, EdgePicture>();
-        //public Dictionary<Node, NodePicture> nodePictures = new Dictionary<Node, NodePicture>();
         public FunctionsLogic(MainWindow mainWindow)
         {
             this.mainWindow = mainWindow;
@@ -36,7 +35,7 @@ namespace WPFlab3
                 StrokeThickness = 2,
                 Fill = Brushes.White,
             };
-            vertex.MouseDown += mainWindow.PaintColor; //подписываем vertex(вершину) на событие изменения цвета
+            vertex.MouseDown += mainWindow.PaintColor; //подписываем vertex на событие изменения цвета
             double posX = position.X - vertex.Width / 2;
             double posY = position.Y - vertex.Height / 2;
 
@@ -107,7 +106,7 @@ namespace WPFlab3
                     };
                     string tb = "№ " + numEdges.ToString();
                     if (weight != 0)
-                        tb += "; Вес " + weight.ToString();
+                        tb += ";" + "Вес " + weight.ToString();
                     textBox.Text = tb;
                     textBox.IsEnabled = false;
 
@@ -366,20 +365,6 @@ namespace WPFlab3
 
             return (Math.Pow(x - h, 2) / Math.Pow(r, 2)) + (Math.Pow(y - k, 2) / Math.Pow(r, 2)) <= 1;
         }
-        public bool IsPointInsideEllipse(Ellipse ellipse, double x, double y)
-        {
-            double left = Canvas.GetLeft(ellipse);
-            double top = Canvas.GetTop(ellipse);
-           
-            double width = ellipse.Width;
-            double height = ellipse.Height;
-
-            double h = left + width / 2;
-            double k = top + height / 2;
-            double r = width / 2;
-
-            return (Math.Pow(x - h, 2) / Math.Pow(r, 2)) + (Math.Pow(y - k, 2) / Math.Pow(r, 2)) <= 1;
-        }
         public void FindRoutes(int[,] adjacencyMatrix, int start, int end, bool[] visited, string route, TextBox tb)
         {
             int allVertices = adjacencyMatrix.GetLength(1);
@@ -464,6 +449,17 @@ namespace WPFlab3
             double dy = py - yy;
             return Math.Sqrt(dx * dx + dy * dy); //расстояние до ближайшей точки
         }
+        public void CreateGraph(List<Node> nodes, Dictionary<int,Node> graph)
+        {
+            for (int count = 0; count < nodes.Count; count++)
+            {
+                CreateVertex(nodes[count].position, nodes[count]);
+                if (nodes[count].edges != null)
+                    for (int i = 0; i < nodes[count].edges.Count; i++)
+                        AddEdge(nodes[count].position, nodes[count].edges.ElementAt(i).adjacentNode.position, graph, mainWindow.graphData, nodes[count].edges.ElementAt(i).weight);
+            }
+        }
+
     }
     class Vertex
     {

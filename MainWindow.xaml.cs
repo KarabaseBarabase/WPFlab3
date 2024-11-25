@@ -28,12 +28,13 @@ namespace WPFlab3
         public bool isOriented;
         public List<(int, int, int)> graphData = new List<(int, int, int)>(); // (int,int,int,Point)
         public Dictionary<int, Node> graph = new Dictionary<int, Node>();
-        private Line tempLine;
+        private Line tempLine = new Line();
         public MainWindow()
         {
             function = new FunctionsLogic(this);
             InitializeComponent();
             tb_save.Text = AppDomain.CurrentDomain.BaseDirectory + "\\userSettings.json";
+            tb_load.Text = AppDomain.CurrentDomain.BaseDirectory + "\\userSettings.json";
         }
         public void PaintColor(object sender, RoutedEventArgs e)
         {
@@ -50,18 +51,25 @@ namespace WPFlab3
                             if (graph[V].edges.Count > 0 && graph[V].edges != null)
                                 if (function.IsPointOnLine(line, graph[V].position, 5) && function.IsPointOnLine(line, graph[V].edges.ElementAt(i).adjacentNode.position, 5))
                                     graph[V].edges.ElementAt(i).edgePic.ColorEdge = selectedColorName;
-                        for (int j =0; j < graph[V].parents.Count; j++)
+                        for (int j = 0; j < graph[V].parents.Count; j++)
                             if (graph[V].parents.Count > 0 && graph[V].parents != null)
-                                if (function.IsPointOnLine(line, graph[V].parents.ElementAt(j).Value.adjacentNode.position, 5) && function.IsPointOnLine(line, graph[V].position, 5))
+                                if (function.IsPointOnLine(line, graph[V].parents.ElementAt(j).Key.position, 5) && function.IsPointOnLine(line, graph[V].position, 5))
                                     graph[V].parents.ElementAt(j).Value.edgePic.ColorEdge = selectedColorName;
                     }
                 }
                 else if (sender is Ellipse vertex)
                 {
+                    Grid thisGrid = new Grid();
+                    for (int i = 0; i < DrawingCanvas.Children.Count; i++)
+                        if (DrawingCanvas.Children[i] is Grid grid && grid.Children[0] == vertex)
+                        {
+                            thisGrid = grid; break;
+                        }
+
                     string selectedColorName = function.GetSelectedColor();
                     vertex.Stroke = function.ConvertStringToBrush(selectedColorName);
                     for (int V = 0; V < graph.Count; V++)
-                        if (function.IsPointInsideEllipse(vertex, graph[V].position.X, graph[V].position.Y))
+                        if (function.IsPointInsideEllipse(thisGrid, Convert.ToInt32(graph[V].position.X), Convert.ToInt32(graph[V].position.Y)))
                             graph[V].nodePic.colorNode = selectedColorName;
                 }
             }
@@ -79,7 +87,7 @@ namespace WPFlab3
                     function.CreateVertex(MousePos, node);
                     graphData.Add((node.MyValue, -1, 0));
 
-                    NodePicture nodePic = new NodePicture("", "Black");
+                    NodePicture nodePic = new NodePicture(graph.Count().ToString(), "Black");
                     node.nodePic = nodePic;
                 }
             }
@@ -398,12 +406,7 @@ namespace WPFlab3
                             Ellipse ellipse = (Ellipse)grid.Children[0];
                             for (int j = 0; j < path.Count; j++)
                                 if (function.IsPointInsideEllipse(grid, Convert.ToInt32(graph.ElementAt(path[j]).Value.position.X), Convert.ToInt32(graph.ElementAt(path[j]).Value.position.Y)))
-                                {
                                     ellipse.Fill = Brushes.Blue;
-                                    for (int v = 0; v < graph.Count; v++)
-                                        if (graph.ElementAt(v).Value.MyValue == path[j])
-                                            graph.ElementAt(v).Value.nodePic = new NodePicture(graph.ElementAt(v).Value.nodePic.tbNode, "Blue");
-                                }
                         }
             }
         }
@@ -440,12 +443,7 @@ namespace WPFlab3
                             Ellipse ellipse = (Ellipse)grid.Children[0];
                             for (int j = 0; j < curPath.Count; j++)
                                 if (function.IsPointInsideEllipse(grid, Convert.ToInt32(graph.ElementAt(curPath[j]).Value.position.X), Convert.ToInt32(graph.ElementAt(curPath[j]).Value.position.Y)))
-                                {
                                     ellipse.Fill = Brushes.Blue;
-                                    for (int v = 0; v < graph.Count; v++)
-                                        if (graph.ElementAt(v).Value.MyValue == curPath[j])
-                                            graph.ElementAt(v).Value.nodePic = new NodePicture(graph.ElementAt(v).Value.nodePic.tbNode, "Blue");
-                                }
                         }
             }
         }
@@ -462,24 +460,19 @@ namespace WPFlab3
             }
             else { tb_graph.Text = "Минимальное покрывающее дерево найдено."; }
 
+            bool[] visited = new bool[graph.Count];
             for (int obj = 0; obj < DrawingCanvas.Children.Count; obj++)
                 if (DrawingCanvas.Children[obj] is Line line)
                     for (int edg = 0; edg < mbstEdges.Count; edg++)
                         if (function.IsPointOnLine(line, mbstEdges[edg].adjacentNode.position, 5))
-                        {
-                            line.Stroke = Brushes.Blue;
-                            for (int v = 0; v < graph.Count; v++)
-                                if (graph.ElementAt(v).Value.edges.Contains(mbstEdges[edg]))
+                            for (int j = 0; j < mbstEdges[edg].adjacentNode.parents.Count; j++)
+                                if (function.IsPointOnLine(line, mbstEdges[edg].adjacentNode.parents.ElementAt(j).Key.position, 5))
                                 {
-                                    graph.ElementAt(v).Value.edges.Remove(mbstEdges[edg]);
-                                    mbstEdges[edg].edgePic = new EdgePicture(mbstEdges[edg].edgePic.TbEdge, "Blue");
-                                    graph.ElementAt(v).Value.edges.Add(mbstEdges[edg]);
+                                    if (visited[mbstEdges[edg].adjacentNode.MyValue] != true)
+                                        visited[mbstEdges[edg].adjacentNode.MyValue] = true;
+                                    else break;
+                                    line.Stroke = Brushes.Blue;
                                 }
-                                else //if (graph.ElementAt(v).Value.parents.Values.Contains(mbstEdges[edg])) {
-                                    for (int i = 0; i < graph.ElementAt(v).Value.parents.Count; i++)
-                                        if (graph.ElementAt(v).Value.parents.ElementAt(i).Value == mbstEdges[edg])
-                                            graph.ElementAt(v).Value.parents.ElementAt(i).Value.edgePic = new EdgePicture(mbstEdges[edg].edgePic.TbEdge, "Blue");
-                        }
         }
         public void ResetColour(Dictionary<int, Node> graph)
         {
@@ -537,8 +530,19 @@ namespace WPFlab3
         private void BtnClick_LoadGraph(object sender, RoutedEventArgs e)
         {
             SettingsManager settingsManager = new SettingsManager();
-            List<NodeDTO> graphDTO = settingsManager.LoadSettings(tb_save.Text);
-            //CreateGraph
+            List<NodeDTO> nodesDTO = settingsManager.LoadSettings(tb_save.Text);
+            Dictionary<int, Node> newGraph = new Dictionary<int, Node>();
+            DrawingCanvas.Children.Clear(); graphData.Clear();
+
+            for (int i = 0; i < nodesDTO.Count; i++)
+            {
+                Node node = new Node(nodesDTO[i], nodesDTO);
+                MessageBox.Show(node.ToString());
+                newGraph.Add(nodesDTO[i].value, node);
+            }
+            graph = newGraph;
+            function.CreateGraph(newGraph.Values.ToList(), graph);
         }
+        
     }
 }

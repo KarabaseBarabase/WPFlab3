@@ -18,9 +18,8 @@
                         <Button>
                             <Menu>
                                 <MenuItem Header="Файл">
-                                    <MenuItem Header="Сохранить граф"/>
-                                    <MenuItem Header="Загрузить граф"/>
-                                    <MenuItem Header="Сохранить изменения"/>
+                                    <MenuItem Header="Сохранить граф" Click="BtnClick_SaveGraph"/>
+                                    <MenuItem Header="Загрузить граф" Click="BtnClick_LoadGraph"/>
                                 </MenuItem>
                                 <MenuItem Header="Инструменты">
                                     <MenuItem Header="Создать вершину"/>
@@ -40,8 +39,8 @@
                             <TextBox Margin="5" x:Name="tb_save"/>
                         </DockPanel>
                         <DockPanel>
-                            <Button Width="110" Margin="5" Content="загрузить из файла"/>
-                            <TextBox Margin="5"/>
+                            <Button Width="110" Margin="5" Content="загрузить из файла" Click="BtnClick_LoadGraph"/>
+                            <TextBox Margin="5" x:Name="tb_load"/>
                         </DockPanel>
                     </StackPanel>
                     <DockPanel x:Name="DockPanel1" Width="164">
