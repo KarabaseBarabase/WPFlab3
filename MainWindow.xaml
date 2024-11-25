@@ -23,16 +23,15 @@
                                 </MenuItem>
                                 <MenuItem Header="Инструменты">
                                     <MenuItem Header="Выбрать вершину" Click="MenuItem_VertexClick">
-                                        <MenuItem Header="^" Click="MenuItem_NextClick"></MenuItem>
-                                        <MenuItem Header="пред" Click="MenuItem_PrevClick"></MenuItem>
+                                        <MenuItem Header="след." Click="MenuItem_NextClick"></MenuItem>
+                                        <MenuItem Header="пред." Click="MenuItem_PrevClick"></MenuItem>
                                     </MenuItem>
                                     <MenuItem Header="Удалить элемент" Click="MenuItem_DeleteClick"/>
                                     <MenuItem Header="Создать вершину"/>
                                     <MenuItem Header="Создать ребро"/>
-                                    <MenuItem Header="Создать матрицу смежности"/>
-                                    <MenuItem Header="Создать матрицу инцидентности"/>
-                                    <MenuItem Header="Построить граф по матрице смежности"></MenuItem>
-                                    <MenuItem Header="Построить граф по матрице инцидентности"></MenuItem>
+                                    <MenuItem Header="Изменить вес ребра"></MenuItem>
+                                    <MenuItem Header="Создать матрицу смежности" Click="BtnClick_GenerateAdjacencyMatrix"/>
+                                    <MenuItem Header="Создать матрицу инцидентности" Click="BtnClick_GenerateIncidenceMatrix"/>
                                 </MenuItem>
                             </Menu>
                         </Button>

@@ -359,7 +359,7 @@ namespace WPFlab3
                 tb_graph.Text += '\n';
             }
         }
-        public void BtnClick_GenerateAdjacencyMatrix(object sender, EventArgs e)
+        public void BtnClick_GenerateAdjacencyMatrix(object sender, RoutedEventArgs e)
         {
             int[,] arr = function.GenerateAdjacencyMatrix(graph);
             if (arr == null) { tb_graph.Text = "Граф не имеет вершин!"; return; }
