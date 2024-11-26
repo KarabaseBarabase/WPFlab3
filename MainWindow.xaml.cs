@@ -84,7 +84,7 @@ namespace WPFlab3
                 {
                     node = node.AddOrGetNode(graph, graph.Count);
                     node.position = MousePos;
-                    NodePicture nodePic = new NodePicture(graph.Count().ToString(), "Black");
+                    NodePicture nodePic = new NodePicture(graph.Count().ToString(), function.GetSelectedColor());
                     node.nodePic = nodePic;
 
                     function.CreateVertex(MousePos, node);
