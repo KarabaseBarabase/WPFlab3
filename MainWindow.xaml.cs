@@ -622,20 +622,15 @@ namespace WPFlab3
 
         private void MenuItem_DeleteClick(object sender, RoutedEventArgs e)
         {
-            for (int g = 0; g < DrawingCanvas.Children.Count; g++)
-                if (DrawingCanvas.Children[g] is Grid grid)
-                    foreach (var gridchild in grid.Children)
-                        if ((gridchild is Ellipse ellipse) && ellipse.Equals(kraska)) { 
-                            DrawingCanvas.Children.Remove(DrawingCanvas.Children[g]);
-                            kraskaList.Remove(kraska);
-                        }
 
 
 
             for (int i = 0; i < graph.Count; i++)
             {
+                //MessageBox.Show("a");
                 if (graph.ElementAt(i).Value.AreNodesClose(kraskaPoint, graph.ElementAt(i).Value.position, function.size / 2 + 10))
                 {
+                    
                     for (int j = 0; j < graphData.Count; j++)
                     {
                         if (graphData[j].Item2 == graph.ElementAt(i).Value.MyValue)
@@ -714,6 +709,15 @@ namespace WPFlab3
                                 }
                 }
             }
+
+            for (int g = 0; g < DrawingCanvas.Children.Count; g++)
+                if (DrawingCanvas.Children[g] is Grid grid)
+                    foreach (var gridchild in grid.Children)
+                        if ((gridchild is Ellipse ellipse) && ellipse.Equals(kraska))
+                        {
+                            DrawingCanvas.Children.Remove(DrawingCanvas.Children[g]);
+                            kraskaList.Remove(kraska);
+                        }
         }
     }
 }
