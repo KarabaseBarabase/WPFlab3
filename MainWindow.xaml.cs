@@ -451,15 +451,18 @@ namespace WPFlab3
         {
             ResetColour(graph);
             tb_graph.Clear();
-
+            if (graph == null || graph.Count == 0)
+                return;
             List<Edge> mbstEdges = function.SearchMBST(graph);
+            for (int i = 0; i < mbstEdges.Count; i++)
+                MessageBox.Show(mbstEdges[i].ToString());
             if (mbstEdges.Count == 0 || mbstEdges == null)
             {
-                tb_graph.Text = "Минимальное остовное дерево не найдено. Скорее всего, ваш граф не связный.";
+                tb_graph.Text = "Минимальное остовное дерево" + '\n' + " не найдено. Скорее всего," + '\n' + " ваш граф не связный.";
                 return;
             }
-            else { tb_graph.Text = "Минимальное покрывающее дерево найдено."; }
-
+            else { tb_graph.Text = "Минимальное покрывающее дерево" + '\n' + " найдено."; }
+            
             bool[] visited = new bool[graph.Count];
             for (int obj = 0; obj < DrawingCanvas.Children.Count; obj++)
                 if (DrawingCanvas.Children[obj] is Line line)
@@ -520,28 +523,56 @@ namespace WPFlab3
         private void BtnClick_SaveGraph(object sender, RoutedEventArgs e)
         {
             SettingsManager settingsManager = new SettingsManager();
+            
             List<NodeDTO> graphDTO = new List<NodeDTO>();
 
             for (int i = 0; i < graph.Count; i++)
                 graphDTO.Add(new NodeDTO(graph.ElementAt(i).Value));
-            settingsManager.SaveSettings(graphDTO, tb_save.Text);
+            Settings settings = new Settings(graphDTO, isOriented);
+            settingsManager.SaveSettings(settings, tb_save.Text);
             MessageBox.Show("Граф успешно сохранён.");
         }
         private void BtnClick_LoadGraph(object sender, RoutedEventArgs e)
         {
             SettingsManager settingsManager = new SettingsManager();
-            List<NodeDTO> nodesDTO = settingsManager.LoadSettings(tb_save.Text);
             Dictionary<int, Node> newGraph = new Dictionary<int, Node>();
-            DrawingCanvas.Children.Clear(); graphData.Clear();
+            DrawingCanvas.Children.Clear(); graphData.Clear(); 
+
+            Settings settings = settingsManager.LoadSettings(tb_save.Text);
+            List<NodeDTO> nodesDTO = settings.Nodes;
+            isOriented = settings.IsOriented;
+            RBtn_checked.IsChecked = isOriented;
+            RBtn_unchecked.IsChecked = isOriented == false ? false : true;
 
             for (int i = 0; i < nodesDTO.Count; i++)
             {
-                Node node = new Node(nodesDTO[i], nodesDTO);
-                MessageBox.Show(node.ToString());
+                Node node = new Node(nodesDTO[i], nodesDTO, isOriented);
                 newGraph.Add(nodesDTO[i].value, node);
             }
             graph = newGraph;
             function.CreateGraph(newGraph.Values.ToList(), graph);
+            //for (int i = 0; i < graph.Count; i++)
+            //{
+            //    MessageBox.Show("v " + graph[i].ToString());
+            //    MessageBox.Show("edges");
+            //    for (int j = 0; j < graph[i].edges.Count; j++)
+            //    {
+            //        MessageBox.Show("edge " + graph[i].edges.ElementAt(j).ToString());
+            //        for (int k = 0; k < graph[i].edges.ElementAt(j).adjacentNode.edges.Count; k++)
+            //        {
+            //            MessageBox.Show("edje adjNode edges" + graph[i].edges.ElementAt(j).adjacentNode.edges.ElementAt(k).ToString());
+            //        }
+            //        for (int k = 0; k < graph[i].edges.ElementAt(j).adjacentNode.parents.Count; k++)
+            //        {
+            //            MessageBox.Show("edge adjNode parents " + graph[i].edges.ElementAt(j).adjacentNode.parents.ElementAt(k).Key.ToString() + graph[i].edges.ElementAt(j).adjacentNode.parents.ElementAt(k).Value.ToString());
+            //        }
+            //    }
+            //    MessageBox.Show("parents ");
+            //    for (int j = 0; j < graph[i].parents.Count; j++)
+            //    {
+            //        MessageBox.Show("parent " + graph[i].parents.ElementAt(j).Key.ToString() + " " + graph[i].parents.ElementAt(j).Value.ToString());
+            //    }
+            //}
         }
 
         public int counted = 0;
@@ -622,9 +653,6 @@ namespace WPFlab3
 
         private void MenuItem_DeleteClick(object sender, RoutedEventArgs e)
         {
-
-
-
             for (int i = 0; i < graph.Count; i++)
             {
                 //MessageBox.Show("a");

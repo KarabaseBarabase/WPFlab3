@@ -23,8 +23,8 @@
                                 </MenuItem>
                                 <MenuItem Header="Инструменты">
                                     <MenuItem Header="Выбрать вершину" Click="MenuItem_VertexClick"></MenuItem>
-                                        <MenuItem Header="след." Click="MenuItem_NextClick"></MenuItem>
-                                        <MenuItem Header="пред." Click="MenuItem_PrevClick"></MenuItem>
+                                        <MenuItem Header="  след." Click="MenuItem_NextClick"></MenuItem>
+                                        <MenuItem Header="  пред." Click="MenuItem_PrevClick"></MenuItem>
                                     
                                     <MenuItem Header="Удалить элемент" Click="MenuItem_DeleteClick"/>
                                     <MenuItem Header="Создать вершину"/>
@@ -65,8 +65,8 @@
                     </DockPanel>
                     <StackPanel Width="145">
                         <TextBlock FontSize="15" Text="Граф:"/>
-                        <RadioButton Margin="2" GroupName="GrafType" Checked="RadioButton_Checked" Content="Ориентированный"/>
-                        <RadioButton Margin="2" GroupName="GrafType" Checked="RadioButton_Checked" Content="Неориентированный"/>
+                        <RadioButton Margin="2" GroupName="GrafType" Checked="RadioButton_Checked" Content="Ориентированный" x:Name="RBtn_checked"/>
+                        <RadioButton Margin="2" GroupName="GrafType" Checked="RadioButton_Checked" Content="Неориентированный" x:Name="RBtn_unchecked"/>
                         <TextBlock FontSize="15" Margin="2" Text="Вес нового ребра:"/>
                         <TextBox x:Name="tbWeight" Margin="2" Text="0" PreviewTextInput="Digit_PreviewTextInput"/>
                         <!--<StackPanel Orientation="Vertical">

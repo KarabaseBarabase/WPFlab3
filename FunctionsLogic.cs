@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -65,6 +66,17 @@ namespace WPFlab3
             Canvas.SetLeft(grid, posX);
             mainWindow.DrawingCanvas.Children.Add(grid);
         }
+        private bool AddEdge(List<(int, int, int)> graphData, Node node, Node adjacentNode, int weight, Edge edge)
+        {
+            if (edge.AddSearchElement(graphData, node, adjacentNode, weight))
+            {
+                adjacentNode.parents.Add(node, edge);
+                node.edges.Add(edge);
+                return true;
+            }
+            else return false;
+
+        }
         public void AddEdge(Point pos1, Point pos2, Dictionary<int, Node> graph, List<(int, int, int)> graphData, int weight, Edge paintEdge)
         {
             Node from = new Node(); Node to = new Node();
@@ -76,69 +88,73 @@ namespace WPFlab3
                     to = graph.ElementAt(i).Value;
             }
             int numEdges = CalculateEdges(graph);
-            Edge edge2 = new Edge();
             EdgePicture edgePic = new EdgePicture(numEdges.ToString(), "Black");
+            Edge edge2 = new Edge(to, weight, (numEdges+1), edgePic); ;
+            
             if (from.ContainsNode(from.position, graph) && to.ContainsNode(to.position, graph))
-                if (edge2.AddEdge(graphData, from, to, weight, mainWindow.isOriented, numEdges,edgePic ))
-                {
-                    string selectedColorName = GetSelectedColor();
-                    Brush strokeBrush;
-                    if (paintEdge == null)
-                        strokeBrush = ConvertStringToBrush(selectedColorName);
-                    else strokeBrush = ConvertStringToBrush(paintEdge.edgePic.ColorEdge);
-                    Line edge = new Line()
-                    {
-                        X1 = from.position.X,
-                        Y1 = from.position.Y,
-                        X2 = to.position.X,
-                        Y2 = to.position.Y,
-                        Stroke = strokeBrush,
-                        StrokeThickness = 2
-                    };
-                    edge.MouseDown += mainWindow.PaintColor;
-
-                    this.newEdge = false;
-                    TextBox textBox = new TextBox
-                    {
-                        Background = Brushes.Transparent,
-                        BorderThickness = new Thickness(0, 0, 0, 0),
-                        Width = 60,
-                        Height = 18,
-                        IsReadOnly = false,
-                        IsHitTestVisible = true,
-                    };
-                    string tb = "№ " + numEdges.ToString();
-                    if (weight != 0)
-                        tb += ";" + "Вес " + weight.ToString();
-                    textBox.Text = tb;
-                    textBox.IsEnabled = false;
-
-                    textBox.PreviewMouseDown += (object sender, MouseButtonEventArgs e) =>
-                    {
-                        var clickedTb = sender as TextBox;
-                        if (clickedTb != null)
-                            clickedTb.Focus();
-                    };
-
-                    double centerX = (from.position.X + to.position.X) / 2;
-                    double centerY = (from.position.Y + to.position.Y) / 2;
-
-                    Canvas.SetLeft(textBox, centerX - textBox.ActualWidth / 2);
-                    Canvas.SetTop(textBox, centerY - textBox.ActualHeight / 2);
-                    edge.Tag = textBox;
-
-                    mainWindow.DrawingCanvas.Children.Add(edge);
-                    mainWindow.DrawingCanvas.Children.Add(textBox);
-                    if (mainWindow.isOriented == true)
-                    {
-                        Polygon polygon = new Polygon();
-                        polygon = DrawArrow(from.position, to.position);
-                        textBox.Tag = polygon;
-                        mainWindow.DrawingCanvas.Children.Add(polygon);
-                    }
-                }
+                CreateEdge(from, to, paintEdge, edge2, weight);
         }
+        public void CreateEdge(Node from, Node to, Edge paintEdge, Edge edge2, int weight)
+        {
+            if (AddEdge(mainWindow.graphData, from, to, weight, edge2))
+            {
+                string selectedColorName = GetSelectedColor();
+                Brush strokeBrush;
+                if (paintEdge == null)
+                    strokeBrush = ConvertStringToBrush(selectedColorName);
+                else strokeBrush = ConvertStringToBrush(paintEdge.edgePic.ColorEdge);
+                Line edge = new Line()
+                {
+                    X1 = from.position.X,
+                    Y1 = from.position.Y,
+                    X2 = to.position.X,
+                    Y2 = to.position.Y,
+                    Stroke = strokeBrush,
+                    StrokeThickness = 2
+                };
+                edge.MouseDown += mainWindow.PaintColor;
 
+                this.newEdge = false;
+                TextBox textBox = new TextBox
+                {
+                    Background = Brushes.Transparent,
+                    BorderThickness = new Thickness(0, 0, 0, 0),
+                    Width = 60,
+                    Height = 18,
+                    IsReadOnly = false,
+                    IsHitTestVisible = true,
+                };
+                string tb = "№ " + edge2.num.ToString();
+                if (weight != 0)
+                    tb += ";" + "Вес " + weight.ToString();
+                textBox.Text = tb;
+                textBox.IsEnabled = false;
+
+                textBox.PreviewMouseDown += (object sender, MouseButtonEventArgs e) =>
+                {
+                    var clickedTb = sender as TextBox;
+                    if (clickedTb != null)
+                        clickedTb.Focus();
+                };
+
+                double centerX = (from.position.X + to.position.X) / 2;
+                double centerY = (from.position.Y + to.position.Y) / 2;
+
+                Canvas.SetLeft(textBox, centerX - textBox.ActualWidth / 2);
+                Canvas.SetTop(textBox, centerY - textBox.ActualHeight / 2);
+                edge.Tag = textBox;
+
+                mainWindow.DrawingCanvas.Children.Add(edge);
+                mainWindow.DrawingCanvas.Children.Add(textBox);
+                if (mainWindow.isOriented == true)
+                {
+                    Polygon polygon = new Polygon();
+                    polygon = DrawArrow(from.position, to.position);
+                    textBox.Tag = polygon;
+                    mainWindow.DrawingCanvas.Children.Add(polygon);
+                }
+            }
+        }
         public Polygon DrawArrow(Point pos1, Point pos2)
         {
             double arrowLength = 10; // Длина стрелки
@@ -331,7 +347,7 @@ namespace WPFlab3
                     maxFlowProblem = maxFlowProblem + weight;
                 weight = int.MaxValue;
             }
-            mainWindow.tb_graph.Text += "Минимальной поток равен " + maxFlowProblem.ToString();
+            mainWindow.tb_graph.Text += "Максимальный поток равен " + maxFlowProblem.ToString();
             return allPaths;
         }
         public List<List<int>> ExtractListsFromTextBox(string text) //слизал полностью из гпт, каюсь перед всеми высшими силами и низшими, что властны надо мной и сим миром, Аминь
@@ -381,6 +397,59 @@ namespace WPFlab3
                         FindRoutes(adjacencyMatrix, i, end, visited, route + i + ", ", tb);
                 visited[start] = false;
             }
+        }
+        public List<Edge> SearchMBST(int[,] adjacencyMatrix)
+        {
+            List<Edge> mbstEdges = new List<Edge>();
+            HashSet<int> visited = new HashSet<int>();
+            PriorityQueue<Edge, int> priorityQueue = new PriorityQueue<Edge, int>();
+            int numberOfNodes = adjacencyMatrix.GetLength(1);
+
+            // Начинаем с первого узла (индекс 0)
+            int startNodeIndex = 0;
+            visited.Add(startNodeIndex);
+
+            // Добавляем все рёбра, исходящие из начального узла
+            for (int j = 0; j < numberOfNodes; j++)
+            {
+                if (adjacencyMatrix[startNodeIndex+1, j] > 0) // Проверяем наличие ребра
+                {
+                    Edge edge = new Edge
+                    {
+                        adjacentNode = new Node { MyValue = j }, // Создаем новый узел
+                        weight = adjacencyMatrix[startNodeIndex+1, j]
+                    };
+                    priorityQueue.Enqueue(edge, edge.weight);
+                }
+            }
+
+            while (priorityQueue.Count > 0)
+            {
+                Edge edge = priorityQueue.Dequeue();
+
+                // Если соседний узел уже посещен, пропускаем его
+                if (visited.Contains(edge.adjacentNode.MyValue)) continue;
+
+                mbstEdges.Add(edge);
+                visited.Add(edge.adjacentNode.MyValue);
+
+                // Добавляем все рёбра, исходящие из нового узла
+                for (int j = 0; j < numberOfNodes; j++)
+                {
+                    if (adjacencyMatrix[edge.adjacentNode.MyValue+1, j] > 0 && !visited.Contains(j)) // Проверяем наличие ребра и посещенность
+                    {
+                        Edge nextEdge = new Edge
+                        {
+                            adjacentNode = new Node { MyValue = j }, // Создаем новый узел
+                            weight = adjacencyMatrix[edge.adjacentNode.MyValue+1, j]
+                        };
+
+                        priorityQueue.Enqueue(nextEdge, nextEdge.weight);
+                    }
+                }
+            }
+
+            return mbstEdges;
         }
         public List<Edge> SearchMBST(Dictionary<int, Node> nodes) //alg Prima
         {
@@ -459,7 +528,7 @@ namespace WPFlab3
                 CreateVertex(nodes[count].position, nodes[count]);
                 if (nodes[count].edges != null)
                     for (int i = 0; i < nodes[count].edges.Count; i++)
-                        AddEdge(nodes[count].position, nodes[count].edges.ElementAt(i).adjacentNode.position, graph, mainWindow.graphData, nodes[count].edges.ElementAt(i).weight, nodes[count].edges.ElementAt(i));
+                        CreateEdge(nodes[count], nodes[count].edges.ElementAt(i).adjacentNode, nodes[count].edges.ElementAt(i), nodes[count].edges.ElementAt(i), nodes[count].edges.ElementAt(i).weight);
             }
         }
 
@@ -478,5 +547,11 @@ namespace WPFlab3
             Path = new List<int>(path);
             Edges = edges;
         }
+    }
+    public class EdgeMBST
+    {
+        public int Source { get; set; }
+        public int Destination { get; set; }
+        public int Weight { get; set; }
     }
 }

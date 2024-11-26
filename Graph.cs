@@ -9,22 +9,10 @@ using System.Xml.Linq;
 
 namespace WPFlab3
 {
-    public class Node : INotifyPropertyChanged
+    public class Node 
     {
-        private int _myValue;
+        public int MyValue { get; set; }
 
-        public int MyValue
-        {
-            get { return _myValue; }
-            set
-            {
-                if (_myValue != value)
-                {
-                    _myValue = value;
-                    OnPropertyChanged(nameof(Node.MyValue));
-                }
-            }
-        }
         public Point position;
         public NodePicture nodePic;
         public HashSet<Edge> edges = new HashSet<Edge>(); //список ребер
@@ -34,12 +22,7 @@ namespace WPFlab3
         public Node(int value, Point pos, NodePicture nodePicture) { MyValue = value; position = pos; nodePic = nodePicture; }
         public Node() { }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        public string ToString() { return _myValue.ToString(); }
+        public string ToString() { return MyValue.ToString(); }
         public Node AddOrGetNode(Dictionary<int, Node> graph, int value)
         {
             if (value == -1) return null;
@@ -49,21 +32,6 @@ namespace WPFlab3
             graph.Add(value, node);
             return node;
         }
-        //public Dictionary<int, Node> CreateGraph(List<(int, int, int)> graphData)
-        //{
-        //    Dictionary<int, Node> graph = new Dictionary<int, Node>();
-        //    foreach ((int, int, int) row in graphData)
-        //    {
-        //        Node node = AddOrGetNode(graph, row.Item1); //откуда
-        //        Node adjacentNode = AddOrGetNode(graph, row.Item2); //куда
-        //        if (adjacentNode == null)
-        //            continue;
-        //        Edge edge = new Edge(adjacentNode, row.Item3);
-        //        node.edges.Add(edge);
-        //        adjacentNode.parents.Add(node, edge);
-        //    }
-        //    return graph;
-        //}
         public bool ContainsNode(Point pos, Dictionary<int, Node> graph)
         {
             for (int i = 0; i < graph.Count; i++)
@@ -86,9 +54,10 @@ namespace WPFlab3
                     adjacentNode = new Node(nodes[i].value, nodes[i].position, nodes[i].nodePic);
 
             Edge edge = new Edge(adjacentNode, curEdge.weight, curEdge.num, curEdge.edgePic);
+            
             return edge;
         }
-        public Node (NodeDTO curNode, List<NodeDTO> nodes)
+        public Node (NodeDTO curNode, List<NodeDTO> nodes, bool isOriented)
         {
             MyValue = curNode.value;
             position = curNode.position;
@@ -98,7 +67,11 @@ namespace WPFlab3
             for (int i = 0; i < curNode.edges.Count; i++)
                 edges.Add(ConvertFromDTO(curNode.edges.ElementAt(i), nodes));
             for (int i = 0; i < edges.Count; i++)
+            {
                 edges.ElementAt(i).adjacentNode.parents.Add(parent, edges.ElementAt(i));
+                //if (!isOriented)
+                //    parents.Add(edges.ElementAt(i).adjacentNode, edges.ElementAt(i));
+            }
             this.edges = edges;
         }
     }
@@ -113,36 +86,23 @@ namespace WPFlab3
         public Edge() { }
         public Edge(Node adjacentNode, int weight, int num, EdgePicture edgePicture) { this.adjacentNode = adjacentNode; this.weight = weight; edgePic = edgePicture; this.num = num; }
         public string ToString() { return weight.ToString() + ", " + adjacentNode.ToString(); }
-        public bool AddEdge(List<(int, int, int)> graphData, Node node, Node adjacentNode, int weight, bool typeEdge, int numEdge, EdgePicture edgePic)
-        {
-            Edge edge = new Edge(adjacentNode, weight, numEdge, edgePic);
-
-            if (AddSearchElement(graphData, node, adjacentNode, weight))
-            {
-                adjacentNode.parents.Add(node, edge);
-                node.edges.Add(edge);
-            }
-            return true;
-        }
+        
         public bool AddSearchElement(List<(int, int, int)> graphData, Node node, Node adjacentNode, int weight)
         {
-            int count = 0; int marker = -1;
+            int count = 0; int marker = -1; 
             foreach ((int, int, int) row in graphData)
             {
                 count++;
                 if (row.Item1 == node.MyValue && row.Item2 == adjacentNode.MyValue)
-                {
-                    MessageBox.Show("Такое ребро уже существует!");
                     return false;
-                }
                 else if (row.Item1 == node.MyValue && row.Item2 == -1)
                     marker = count - 1;
             }
-            if (marker != -1)
-                graphData[marker] = ((node.MyValue, adjacentNode.MyValue, weight));
-            else
-                graphData.Add((node.MyValue, adjacentNode.MyValue, weight));
-            return true;
+                if (marker != -1)
+                    graphData[marker] = ((node.MyValue, adjacentNode.MyValue, weight));
+                else
+                    graphData.Add((node.MyValue, adjacentNode.MyValue, weight));
+                return true;
         }
     }
     public class EdgePicture
@@ -182,6 +142,7 @@ namespace WPFlab3
             edgePic = edge.edgePic;
             num = edge.num;
         }
+        public string ToString() { return adjacentNodeValue.ToString(); }
         
     }
     public class NodeDTO
@@ -198,7 +159,10 @@ namespace WPFlab3
             position = node.position;
             nodePic = node.nodePic;
             for (int i = 0; i < node.edges.Count; i++)
+            {
                 edges.Add(new EdgeDTO(node.edges.ElementAt(i)));
+                MessageBox.Show("save " + edges.ElementAt(i).ToString());
+            }
             //for (int j = 0; j < node.parents.Count; j++)
             //    parents.Add(node.parents.ElementAt(j).Key, new EdgeDTO(node.parents.ElementAt(j).Value));
 
