@@ -550,15 +550,22 @@ namespace WPFlab3
         private void MenuItem_VertexClick(object sender, RoutedEventArgs e)
         {
             for (int g = 0; g < DrawingCanvas.Children.Count; g++)
+            {
                 if (DrawingCanvas.Children[g] is Grid grid)
+                {
                     foreach (var gridchild in grid.Children)
                         if (gridchild is Ellipse ellipse)
                         {
-                            ellipse.Fill = Brushes.Red;
-                            kraska = ellipse;
                             kraskaList.Add(ellipse);
-                            return;
+                            //ellipse.Fill = Brushes.Red;
+                            //kraska = ellipse;
+                            //kraskaList.Add(ellipse);
+                            //return;
                         }
+                }
+            }
+            kraska = kraskaList[0];
+            kraska.Fill = Brushes.Red;
         }
 
         private void MenuItem_NextClick(object sender, RoutedEventArgs e)
@@ -566,19 +573,39 @@ namespace WPFlab3
             for (int g = 0; g < DrawingCanvas.Children.Count + 1; g++)
                 if (DrawingCanvas.Children[g] is Grid grid)
                     foreach (var gridchild in grid.Children)
-                        if ((gridchild is Ellipse ellipse) && !kraskaList.Contains(ellipse))
+                        if ((gridchild is Ellipse ellipse))
+                        //if ((gridchild is Ellipse ellipse) && !kraskaList.Contains(ellipse))
                         {
-                            ellipse.Fill = Brushes.Red;
-                            counted++; //?
                             kraska.Fill = Brushes.White;
-                            kraska = ellipse;
-                            kraskaList.Add(ellipse);
+                            counted++;
+                            kraska = kraskaList[counted];
+                            kraska.Fill = Brushes.Red;
+                            //ellipse.Fill = Brushes.Red;
+                            //counted++; //?
+                            //kraska.Fill = Brushes.White;
+                            //kraska = ellipse;
+                            //kraskaList.Add(ellipse);
                             return;
                         }
         }
         private void MenuItem_PrevClick(object sender, RoutedEventArgs e)
         {
-
+            for (int g = 0; g < DrawingCanvas.Children.Count + 1; g++)
+                if (DrawingCanvas.Children[g] is Grid grid)
+                    foreach (var gridchild in grid.Children)
+                        if ((gridchild is Ellipse ellipse) && kraskaList.Contains(ellipse))
+                        {
+                            kraska.Fill = Brushes.White;
+                            counted--;
+                            kraska = kraskaList[counted];
+                            kraska.Fill = Brushes.Red;
+                            //ellipse.Fill = Brushes.Red;
+                            //counted++; //?
+                            //kraska.Fill = Brushes.White;
+                            //kraska = ellipse;
+                            //kraskaList.Add(ellipse);
+                            return;
+                        }
         }
 
         private void MenuItem_DeleteClick(object sender, RoutedEventArgs e)
@@ -586,8 +613,93 @@ namespace WPFlab3
             for (int g = 0; g < DrawingCanvas.Children.Count; g++)
                 if (DrawingCanvas.Children[g] is Grid grid)
                     foreach (var gridchild in grid.Children)
-                        if ((gridchild is Ellipse ellipse) && ellipse.Equals(kraska))
+                        if ((gridchild is Ellipse ellipse) && ellipse.Equals(kraska)) { 
                             DrawingCanvas.Children.Remove(DrawingCanvas.Children[g]);
+                            kraskaList.Remove(kraska);
+                        }
+
+
+
+            for (int i = 0; i < graph.Count; i++) { 
+                //if (graph.ElementAt(i).Value.AreNodesClose(MousePos, graph.ElementAt(i).Value.position, function.size / 2 + 10))
+                //{
+                    for (int j = 0; j < graphData.Count; j++)
+                    {
+                        if (graphData[j].Item2 == graph.ElementAt(i).Value.MyValue)
+                            graphData[j] = (graphData[j].Item1, -1, graphData[j].Item3);
+                        if (graphData[j].Item1 == graph.ElementAt(i).Value.MyValue)
+                        {
+                            graphData.RemoveAt(j);
+                            break;
+                        }
+                    }
+                    Node delNode = graph.ElementAt(i).Value;
+                    graph.Remove(graph.ElementAt(i).Key);
+                    for (int k = 0; k < graph.Count; k++)
+                    {
+                        for (int l = 0; l < delNode.parents.Count; l++)
+                            if (graph.ElementAt(k).Value == delNode.parents.ElementAt(l).Key) //если вершина - предок
+                                graph.ElementAt(k).Value.edges.Remove(delNode.parents.ElementAt(l).Value);
+                            else
+                                for (int j = 0; j < delNode.edges.Count; j++)
+                                    if (graph.ElementAt(k).Value == delNode.edges.ElementAt(j).adjacentNode) //если вершина - потомок  
+                                        graph.ElementAt(k).Value.parents.Remove(graph.ElementAt(k).Value.parents.ElementAt(0).Key);
+                    }
+
+                    for (int k = delNode.MyValue; k < graph.Count; k++)
+                    {
+                        int newV = graphData[k].Item1 - 1;
+                        graphData[k] = (newV, graphData[k].Item2, graphData[k].Item3);
+
+                        graph.ElementAt(k).Value.MyValue--;
+                        Node tempNode = graph.ElementAt(k).Value;
+                        graph.Remove(graph.ElementAt(k).Key);
+                        graph.Add(tempNode.MyValue, tempNode);
+                    }
+
+                    // + удаление картинки ребра
+                    List<Line> delLines = new List<Line>();
+                    if (delNode.parents.Count > 0)
+                        for (int j = 0; j < delNode.parents.Count; j++)
+                        {
+                            Line delLine = new Line
+                            {
+                                X1 = delNode.parents.ElementAt(j).Key.position.X,
+                                Y1 = delNode.parents.ElementAt(j).Key.position.Y,
+                                X2 = delNode.position.X,
+                                Y2 = delNode.position.Y,
+                            };
+                            delLines.Add(delLine);
+                        }
+                    if (delNode.edges.Count > 0)
+                        for (int j = 0; j < delNode.edges.Count; j++)
+                        {
+                            Line delLine = new Line
+                            {
+                                X1 = delNode.position.X,
+                                Y1 = delNode.position.Y,
+                                X2 = delNode.edges.ElementAt(j).adjacentNode.position.X,
+                                Y2 = delNode.edges.ElementAt(j).adjacentNode.position.Y,
+                            };
+                            delLines.Add(delLine);
+                        }
+                    for (int z = DrawingCanvas.Children.Count - 1; z >= 0; z--)
+                        if (DrawingCanvas.Children[z] is Line line)
+                            for (int w = delLines.Count - 1; w >= 0; w--)
+                                if (delLines[w].X1 == line.X1 && delLines[w].X2 == line.X2 && delLines[w].Y1 == line.Y1 && delLines[w].Y2 == line.Y2)
+                                {
+                                    delLines.RemoveAt(w);
+                                    DrawingCanvas.Children.RemoveAt(z);
+                                    TextBox tbToRemove = line.Tag as TextBox;
+                                    Polygon arrowToRemove = tbToRemove.Tag as Polygon;
+                                    DrawingCanvas.Children.Remove(tbToRemove);
+                                    try
+                                    {
+                                        DrawingCanvas.Children.Remove(arrowToRemove);
+                                    }
+                                    catch { }
+                                }
+                }
         }
     }
 }
