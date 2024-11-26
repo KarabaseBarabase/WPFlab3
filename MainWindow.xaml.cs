@@ -547,6 +547,9 @@ namespace WPFlab3
         public int counted = 0;
         Ellipse kraska = new Ellipse();
         List<Ellipse> kraskaList = new List<Ellipse>();
+        System.Windows.Point kraskaPoint = new System.Windows.Point();
+        double kraskaX = 0;
+        double kraskaY = 0;
         private void MenuItem_VertexClick(object sender, RoutedEventArgs e)
         {
             for (int g = 0; g < DrawingCanvas.Children.Count; g++)
@@ -566,6 +569,9 @@ namespace WPFlab3
             }
             kraska = kraskaList[0];
             kraska.Fill = Brushes.Red;
+            kraskaX = Canvas.GetLeft(kraska);
+            kraskaY = Canvas.GetTop(kraska);
+            kraskaPoint = new System.Windows.Point(kraskaX, kraskaY);
         }
 
         private void MenuItem_NextClick(object sender, RoutedEventArgs e)
@@ -580,6 +586,9 @@ namespace WPFlab3
                             counted++;
                             kraska = kraskaList[counted];
                             kraska.Fill = Brushes.Red;
+                            kraskaX = Canvas.GetLeft(kraska);
+                            kraskaY = Canvas.GetTop(kraska);
+                            kraskaPoint = new System.Windows.Point(kraskaX, kraskaY);
                             //ellipse.Fill = Brushes.Red;
                             //counted++; //?
                             //kraska.Fill = Brushes.White;
@@ -599,6 +608,9 @@ namespace WPFlab3
                             counted--;
                             kraska = kraskaList[counted];
                             kraska.Fill = Brushes.Red;
+                            kraskaX = Canvas.GetLeft(kraska);
+                            kraskaY = Canvas.GetTop(kraska);
+                            kraskaPoint = new System.Windows.Point(kraskaX, kraskaY);
                             //ellipse.Fill = Brushes.Red;
                             //counted++; //?
                             //kraska.Fill = Brushes.White;
@@ -620,9 +632,10 @@ namespace WPFlab3
 
 
 
-            for (int i = 0; i < graph.Count; i++) { 
-                //if (graph.ElementAt(i).Value.AreNodesClose(MousePos, graph.ElementAt(i).Value.position, function.size / 2 + 10))
-                //{
+            for (int i = 0; i < graph.Count; i++)
+            {
+                if (graph.ElementAt(i).Value.AreNodesClose(kraskaPoint, graph.ElementAt(i).Value.position, function.size / 2 + 10))
+                {
                     for (int j = 0; j < graphData.Count; j++)
                     {
                         if (graphData[j].Item2 == graph.ElementAt(i).Value.MyValue)
@@ -700,6 +713,7 @@ namespace WPFlab3
                                     catch { }
                                 }
                 }
+            }
         }
     }
 }
