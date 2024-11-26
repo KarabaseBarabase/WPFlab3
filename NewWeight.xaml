@@ -5,11 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFlab3"
         mc:Ignorable="d"
-        Title="NewWeight" Height="450" Width="800">
+        Title="NewWeight" Height="150" Width="150">
     <Grid>
         <StackPanel>
-            <TextBox x:Name="newWeightTb"></TextBox>
-            <Button x:Name="newButtonTb" Click="newButtonTb_Click">OK</Button>
+            <TextBlock> Введите новый вес:</TextBlock>
+            <TextBox x:Name="newWeightTb" Margin="5" PreviewTextInput="Digit_PreviewTextInput"></TextBox>
+            <Button x:Name="newButtonTb" Margin="5" Click="newButtonTb_Click">OK</Button>
         </StackPanel>
     </Grid>
 </Window>

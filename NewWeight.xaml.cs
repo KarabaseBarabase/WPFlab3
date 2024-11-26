@@ -29,5 +29,9 @@ namespace WPFlab3
             newWeight = Convert.ToInt32(newWeightTb.Text);
             Close();
         }
+        private void Digit_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !char.IsDigit(e.Text, 0);
+        }
     }
 }

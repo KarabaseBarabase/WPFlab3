@@ -37,5 +37,9 @@ namespace WPFlab3
             isOpen = false;
             Close();
         }
+        private void Digit_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !char.IsDigit(e.Text, 0);
+        }
     }
 }

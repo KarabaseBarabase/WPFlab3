@@ -10,11 +10,11 @@
         <StackPanel Orientation="Vertical">
             <DockPanel Margin="10">
                 <TextBlock Text="Введите стартовую вершину:"></TextBlock>
-                <TextBox x:Name="tb_start" Width="50"></TextBox>
+                <TextBox x:Name="tb_start" Width="50" PreviewTextInput="Digit_PreviewTextInput"></TextBox>
             </DockPanel>
             <DockPanel Margin="10">
                 <TextBlock Text="Введите конечную вершину:"></TextBlock>
-                <TextBox x:Name="tb_end" Width="50"></TextBox>
+                <TextBox x:Name="tb_end" Width="50" PreviewTextInput="Digit_PreviewTextInput"></TextBox>
             </DockPanel>
             <Button Click="BtnClick_Close" Margin="20" Width="50">Ok</Button>
         </StackPanel>

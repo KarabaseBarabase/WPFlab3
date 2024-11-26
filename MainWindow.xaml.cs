@@ -719,5 +719,10 @@ namespace WPFlab3
                             kraskaList.Remove(kraska);
                         }
         }
+
+        private void Digit_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !char.IsDigit(e.Text, 0);
+        }
     }
 }

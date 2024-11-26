@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFlab3"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="475" Width="800">
     <Grid>
 
         <Viewbox>
@@ -68,14 +68,14 @@
                         <RadioButton Margin="2" GroupName="GrafType" Checked="RadioButton_Checked" Content="Ориентированный"/>
                         <RadioButton Margin="2" GroupName="GrafType" Checked="RadioButton_Checked" Content="Неориентированный"/>
                         <TextBlock FontSize="15" Margin="2" Text="Вес нового ребра:"/>
-                        <TextBox x:Name="tbWeight" Margin="2" Text="0" />
-                        <StackPanel Orientation="Vertical">
+                        <TextBox x:Name="tbWeight" Margin="2" Text="0" PreviewTextInput="Digit_PreviewTextInput"/>
+                        <!--<StackPanel Orientation="Vertical">
                             <DockPanel>
                                 <TextBlock Margin="5,5,5,5">Изменение веса:</TextBlock>
                                 <TextBox x:Name="EdgeSelector" TextChanged="edgeSelector_TextChanged" Margin="5,10,5,5"></TextBox>
                             </DockPanel>
                             <TextBox x:Name="WeightChange" Margin="2"></TextBox>
-                        </StackPanel>
+                        </StackPanel>-->
                     </StackPanel>
                     <DockPanel Height="65" x:Name="DockPanel5">
                         <ToggleButton x:Name="Bucket" Width="50" Margin="5,10,5,10" Checked="ControlToggleButton_Checked">
