@@ -29,10 +29,13 @@ namespace WPFlab3
         public List<(int, int, int)> graphData = new List<(int, int, int)>(); // (int,int,int,Point)
         public Dictionary<int, Node> graph = new Dictionary<int, Node>();
         private Line tempLine = new Line();
+
+        private MainWindowMetods _metods;
         public MainWindow()
         {
             function = new FunctionsLogic(this);
             InitializeComponent();
+            _metods = new MainWindowMetods(DrawingCanvas, graph,graphData,function);
             tb_save.Text = AppDomain.CurrentDomain.BaseDirectory + "\\userSettings.json";
             tb_load.Text = AppDomain.CurrentDomain.BaseDirectory + "\\userSettings.json";
         }
@@ -79,197 +82,35 @@ namespace WPFlab3
             MousePos = e.GetPosition(DrawingCanvas);
             if (newVertex)
             {
-                Node node = new Node();
-                if (!node.ContainsNode(MousePos, graph))
-                {
-                    node = node.AddOrGetNode(graph, graph.Count);
-                    node.position = MousePos;
-                    NodePicture nodePic = new NodePicture(graph.Count().ToString(), function.GetSelectedColor());
-                    node.nodePic = nodePic;
-
-                    function.CreateVertex(MousePos, node);
-                    graphData.Add((node.MyValue, -1, 0));
-                }
+                _metods.HandleNewVertex(MousePos);
             }
             else if (newEdge)
             {
-                tempLine = new Line
-                {
-                    X1 = MousePos.X,
-                    Y1 = MousePos.Y,
-                    X2 = MousePos.X,
-                    Y2 = MousePos.Y,
-                    Stroke = function.ConvertStringToBrush(function.GetSelectedColor()),
-                    StrokeThickness = 2,
-                };
-                DrawingCanvas.Children.Add(tempLine);
+                StartDrawingEdge();
             }
             else if (delete)
             {
-                if (DrawingCanvas != null && DrawingCanvas.InputHitTest(MousePos) != null)
-                {
-                    var element = DrawingCanvas.InputHitTest(MousePos) as UIElement;
-
-                    if (element.GetType() == typeof(Ellipse))
-                    {
-                        var temp = DrawingCanvas.InputHitTest(MousePos) as UIElement;
-                        while (temp != null && !(temp is Grid))
-                            temp = VisualTreeHelper.GetParent(temp) as UIElement;
-                        if (temp is Grid grid)
-                            DrawingCanvas.Children.Remove(grid);
-
-
-                        for (int i = 0; i < graph.Count; i++)
-                            if (graph.ElementAt(i).Value.AreNodesClose(MousePos, graph.ElementAt(i).Value.position, function.size / 2 + 10))
-                            {
-                                for (int j = 0; j < graphData.Count; j++)
-                                {
-                                    if (graphData[j].Item2 == graph.ElementAt(i).Value.MyValue)
-                                        graphData[j] = (graphData[j].Item1, -1, graphData[j].Item3);
-                                    if (graphData[j].Item1 == graph.ElementAt(i).Value.MyValue)
-                                    {
-                                        graphData.RemoveAt(j);
-                                        break;
-                                    }
-                                }
-                                Node delNode = graph.ElementAt(i).Value;
-                                graph.Remove(graph.ElementAt(i).Key);
-                                for (int k = 0; k < graph.Count; k++)
-                                {
-                                    for (int l = 0; l < delNode.parents.Count; l++)
-                                        if (graph.ElementAt(k).Value == delNode.parents.ElementAt(l).Key) //если вершина - предок
-                                            graph.ElementAt(k).Value.edges.Remove(delNode.parents.ElementAt(l).Value);
-                                        else
-                                            for (int j = 0; j < delNode.edges.Count; j++)
-                                                if (graph.ElementAt(k).Value == delNode.edges.ElementAt(j).adjacentNode) //если вершина - потомок  
-                                                    graph.ElementAt(k).Value.parents.Remove(graph.ElementAt(k).Value.parents.ElementAt(0).Key);
-                                }
-
-                                for (int k = delNode.MyValue; k < graph.Count; k++)
-                                {
-                                    int newV = graphData[k].Item1 - 1;
-                                    graphData[k] = (newV, graphData[k].Item2, graphData[k].Item3);
-
-                                    graph.ElementAt(k).Value.MyValue--;
-                                    Node tempNode = graph.ElementAt(k).Value;
-                                    graph.Remove(graph.ElementAt(k).Key);
-                                    graph.Add(tempNode.MyValue, tempNode);
-                                }
-
-                                // + удаление картинки ребра
-                                List<Line> delLines = new List<Line>();
-                                if (delNode.parents.Count > 0)
-                                    for (int j = 0; j < delNode.parents.Count; j++)
-                                    {
-                                        Line delLine = new Line
-                                        {
-                                            X1 = delNode.parents.ElementAt(j).Key.position.X,
-                                            Y1 = delNode.parents.ElementAt(j).Key.position.Y,
-                                            X2 = delNode.position.X,
-                                            Y2 = delNode.position.Y,
-                                        };
-                                        delLines.Add(delLine);
-                                    }
-                                if (delNode.edges.Count > 0)
-                                    for (int j = 0; j < delNode.edges.Count; j++)
-                                    {
-                                        Line delLine = new Line
-                                        {
-                                            X1 = delNode.position.X,
-                                            Y1 = delNode.position.Y,
-                                            X2 = delNode.edges.ElementAt(j).adjacentNode.position.X,
-                                            Y2 = delNode.edges.ElementAt(j).adjacentNode.position.Y,
-                                        };
-                                        delLines.Add(delLine);
-                                    }
-                                for (int z = DrawingCanvas.Children.Count - 1; z >= 0; z--)
-                                    if (DrawingCanvas.Children[z] is Line line)
-                                        for (int w = delLines.Count - 1; w >= 0; w--)
-                                            if (delLines[w].X1 == line.X1 && delLines[w].X2 == line.X2 && delLines[w].Y1 == line.Y1 && delLines[w].Y2 == line.Y2)
-                                            {
-                                                delLines.RemoveAt(w);
-                                                DrawingCanvas.Children.RemoveAt(z);
-                                                TextBox tbToRemove = line.Tag as TextBox;
-                                                Polygon arrowToRemove = tbToRemove.Tag as Polygon;
-                                                DrawingCanvas.Children.Remove(tbToRemove);
-                                                try
-                                                {
-                                                    DrawingCanvas.Children.Remove(arrowToRemove);
-                                                }
-                                                catch { }
-                                            }
-                            }
-                    }
-                    if (element.GetType() == typeof(Line))
-                    {
-                        DrawingCanvas.Children.Remove(element);
-                        Line line = (Line)element;
-                        TextBox tbToRemove = line.Tag as TextBox;
-                        Polygon arrowToRemove = tbToRemove.Tag as Polygon;
-                        DrawingCanvas.Children.Remove(tbToRemove);
-                        try
-                        {
-                            DrawingCanvas.Children.Remove(arrowToRemove);
-                        }
-                        catch { }
-                        System.Windows.Point begin = new System.Windows.Point(line.X1, line.Y1);
-                        System.Windows.Point end = new System.Windows.Point(line.X2, line.Y2);
-                        for (int i = 0; i < graph.Count; i++)
-                            if (graph.ElementAt(i).Value.AreNodesClose(begin, graph.ElementAt(i).Value.position, 10) || graph.ElementAt(i).Value.AreNodesClose(end, graph.ElementAt(i).Value.position, 10))
-                            {
-                                for (int j = 0; j < graphData.Count; j++)
-                                    if (graphData[j].Item2 == graph.ElementAt(i).Value.MyValue)
-                                    {
-                                        graphData[j] = (graphData[j].Item1, -1, graphData[j].Item3);
-                                        break;
-                                    }
-
-
-                                if (graph.ElementAt(i).Value.position == end)
-                                {
-                                    for (int k = 0; k < graph.Count; k++)
-                                        for (int l = 0; l < graph.ElementAt(i).Value.parents.Count; l++)
-                                            if (begin == graph.ElementAt(i).Value.parents.ElementAt(l).Key.position) //для конца ребра
-                                                graph.ElementAt(i).Value.parents.Remove(graph.ElementAt(k).Value);
-                                }
-                                else if (graph.ElementAt(i).Value.position == begin)
-                                    for (int j = 0; j < graph.Count; j++)
-                                    {
-                                        for (int k = 0; k < graph[i].edges.Count; k++) //для начала ребра
-                                            if (graph.ElementAt(j).Value == graph[i].edges.ElementAt(k).adjacentNode && graph.ElementAt(j).Value.position == end)
-                                                graph.ElementAt(i).Value.edges.Remove(graph[i].edges.ElementAt(k));
-                                    }
-                            }
-                    }
-                }
+                _metods.HandleDelete(MousePos);
             }
             else if (pointer)
             {
-                var el = DrawingCanvas.InputHitTest(MousePos) as UIElement;
-                NewWeight nw = new NewWeight();
-                if (el.GetType() == typeof(Line))
-                {
-                    Line line = (Line)el;
-                    nw.ShowDialog();
-                    int weight = nw.newWeight;
-                    for (int V = 0; V < graph.Count; V++)
-                    {
-                        for (int i = 0; i < graph[i].edges.Count; i++)
-                            if (graph[V].edges.Count > 0 && graph[V].edges != null)
-                                if (function.IsPointOnLine(line, graph[V].position, 5) && function.IsPointOnLine(line, graph[V].edges.ElementAt(i).adjacentNode.position, 5))
-                                {
-                                    graph[V].edges.ElementAt(i).weight = weight;
-                                    TextBox tb = line.Tag as TextBox;
-                                    string[] parts = tb.Text.Split(';');
-                                    tb.Text = parts[0] + ";Вес " + weight.ToString();
-                                }
-                        for (int j = 0; j < graph[V].parents.Count; j++)
-                            if (graph[V].parents.Count > 0 && graph[V].parents != null)
-                                if (function.IsPointOnLine(line, graph[V].parents.ElementAt(j).Value.adjacentNode.position, 5) && function.IsPointOnLine(line, graph[V].position, 5))
-                                    graph[V].parents.ElementAt(j).Value.weight = weight;
-                    }
-                }
+                _metods.HandlePointer(MousePos);
             }
+        }
+
+        
+        private void StartDrawingEdge()
+        {
+            tempLine = new Line
+            {
+                X1 = MousePos.X,
+                Y1 = MousePos.Y,
+                X2 = MousePos.X,
+                Y2 = MousePos.Y,
+                Stroke = function.ConvertStringToBrush(function.GetSelectedColor()),
+                StrokeThickness = 2,
+            };
+            DrawingCanvas.Children.Add(tempLine);
         }
 
         private void MouseLeftButtonUp_DrawingGraph(object sender, MouseButtonEventArgs e) //for add edge
@@ -591,10 +432,6 @@ namespace WPFlab3
                         if (gridchild is Ellipse ellipse)
                         {
                             kraskaList.Add(ellipse);
-                            //ellipse.Fill = Brushes.Red;
-                            //kraska = ellipse;
-                            //kraskaList.Add(ellipse);
-                            //return;
                         }
                 }
             }
@@ -611,7 +448,6 @@ namespace WPFlab3
                 if (DrawingCanvas.Children[g] is Grid grid)
                     foreach (var gridchild in grid.Children)
                         if ((gridchild is Ellipse ellipse))
-                        //if ((gridchild is Ellipse ellipse) && !kraskaList.Contains(ellipse))
                         {
                             kraska.Fill = Brushes.White;
                             counted++;
@@ -620,11 +456,7 @@ namespace WPFlab3
                             kraskaX = Canvas.GetLeft(kraska);
                             kraskaY = Canvas.GetTop(kraska);
                             kraskaPoint = new System.Windows.Point(kraskaX, kraskaY);
-                            //ellipse.Fill = Brushes.Red;
-                            //counted++; //?
-                            //kraska.Fill = Brushes.White;
-                            //kraska = ellipse;
-                            //kraskaList.Add(ellipse);
+                            
                             return;
                         }
         }
@@ -642,11 +474,7 @@ namespace WPFlab3
                             kraskaX = Canvas.GetLeft(kraska);
                             kraskaY = Canvas.GetTop(kraska);
                             kraskaPoint = new System.Windows.Point(kraskaX, kraskaY);
-                            //ellipse.Fill = Brushes.Red;
-                            //counted++; //?
-                            //kraska.Fill = Brushes.White;
-                            //kraska = ellipse;
-                            //kraskaList.Add(ellipse);
+                            
                             return;
                         }
         }
@@ -655,7 +483,7 @@ namespace WPFlab3
         {
             for (int i = 0; i < graph.Count; i++)
             {
-                //MessageBox.Show("a");
+                
                 if (graph.ElementAt(i).Value.AreNodesClose(kraskaPoint, graph.ElementAt(i).Value.position, function.size / 2 + 10))
                 {
                     

@@ -60,7 +60,6 @@
                         </ToggleButton>
                         <ToggleButton x:Name="Crest" Height="42" Width="42" Margin="10" Checked="ControlToggleButton_Checked" ToolTip="Удалить элемент">
                             <Image Source="/Crest.png" Height="32" Width="32"/>
-
                         </ToggleButton>
                     </DockPanel>
                     <StackPanel Width="145">
